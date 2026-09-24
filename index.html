@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quiz 2 joueurs — V3.1</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  max-width: 900px;
+  margin: auto;
+  padding: 24px;
+  background: #f5f6f8;
+  color: #222;
+}
+
+.card {
+  background: white;
+  padding: 24px;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px #0001;
+  margin: 16px 0;
+}
+
+button {
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 9px;
+  background: #222;
+  color: white;
+  cursor: pointer;
+  margin: 4px;
+}
+
+button:hover {
+  opacity: .85;
+}
+
+button.secondary {
+  background: #ddd;
+  color: #222;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  margin: 6px 0 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.code {
+  font-size: 32px;
+  font-weight: bold;
+  letter-spacing: 6px;
+  text-align: center;
+  padding: 15px;
+}
+
+.q {
+  border: 1px solid #ddd;
+  padding: 14px;
+  border-radius: 10px;
+  margin: 10px 0;
+}
+
+.answer {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  text-align: left;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Quiz 2 joueurs — V3.1</h1>
+
+<div id="app"></div>
+
+<script>
+
+const app = document.getElementById("app");
+
+let state = {
+  game: null
+};
+
+
+/* =========================
+   ACCUEIL
+========================= */
+
+function home() {
+
+  app.innerHTML = `
+    <div class="card">
+
+      <h2>Créer mon questionnaire</h2>
+
+      <p>
+        Chaque joueur prépare ses 30 questions
+        sur son propre PC.
+      </p>
+
+      <button onclick="createForm()">
+        Créer mes 30 questions
+      </button>
+
+    </div>
+
+
+    <div class="card">
+
+      <h2>Lancer une partie</h2>
+
+      <p>
+        Sur le PC de jeu, saisissez les deux codes.
+      </p>
+
+      <input
+        id="c1"
+        maxlength="6"
+        placeholder="Code joueur 1"
+      >
+
+      <input
+        id="c2"
+        maxlength="6"
+        placeholder="Code joueur 2"
+      >
+
+      <button onclick="startGame()">
+        Lancer la partie
+      </button>
+
+    </div>
+  `;
+}
+
+
+/* =========================
+   CREATION DES QUESTIONS
+========================= */
+
+function createForm() {
+
+  app.innerHTML = `
+    <div class="card">
+
+      <h2>Mes 30 questions</h2>
+
+      <input
+        id="name"
+        placeholder="Nom du joueur"
+      >
+
+      <div id="qs"></div>
+
+      <button onclick="saveQuestions()">
+        Générer mon code
+      </button>
+
+      <button
+        class="secondary"
+        onclick="home()">
+        Retour
+      </button>
+
+    </div>
+  `;
+
+  const q = document.getElementById("qs");
+
+  for (let i = 1; i <= 30; i++) {
+
+    q.innerHTML += `
+
+      <div class="q">
+
+        <b>Question ${i}</b>
+
+        <textarea
+          id="q${i}"
+          rows="2"
+          placeholder="Votre question">
+        </textarea>
+
+        <input
+          id="a${i}1"
+          placeholder="Réponse A">
+
+        <input
+          id="a${i}2"
+          placeholder="Réponse B">
+
+        <input
+          id="a${i}3"
+          placeholder="Réponse C">
+
+        <select id="ok${i}">
+
+          <option value="">
+            Bonne réponse…
+          </option>
+
+          <option value="0">
+            A
+          </option>
+
+          <option value="1">
+            B
+          </option>
+
+          <option value="2">
+            C
+          </option>
+
+        </select>
+
+      </div>
+
+    `;
+  }
+}
+
+
+/* =========================
+   SAUVEGARDE
+========================= */
+
+function saveQuestions() {
+
+  const name =
+    document.getElementById("name")
+      .value.trim() || "Joueur";
+
+  let questions = [];
+
+  for (let i = 1; i <= 30; i++) {
+
+    const text =
+      document.getElementById("q" + i)
+        .value.trim();
+
+    const answers = [
+      document.getElementById("a" + i + "1").value.trim(),
+      document.getElementById("a" + i + "2").value.trim(),
+      document.getElementById("a" + i + "3").value.trim()
+    ];
+
+    const correct =
+      document.getElementById("ok" + i).value;
+
+    if (
+      !text ||
+      answers.some(x => !x) ||
+      correct === ""
+    ) {
+
+      alert(
+        "Merci de compléter toutes les questions."
+      );
+
+      return;
+    }
+
+    questions.push({
+      q: text,
+      a: answers,
+      ok: Number(correct)
+    });
+  }
+
+
+  /*
+     Code temporaire de la V3.1.
+
+     IMPORTANT :
+     Pour le moment il est enregistré
+     dans le navigateur.
+
+     Nous remplacerons cette partie par
+     une base en ligne à l'étape suivante.
+  */
+
+  const code =
+    String(
+      Math.floor(
+        100000 +
+        Math.random() * 900000
+      )
+    );
+
+
+  localStorage.setItem(
+    "quiz_" + code,
+    JSON.stringify({
+      name: name,
+      qs: questions
+    })
+  );
+
+
+  app.innerHTML = `
+
+    <div class="card">
+
+      <h2>
+        Questionnaire enregistré
+      </h2>
+
+      <p>
+        Joueur :
+        <b>${escapeHTML(name)}</b>
+      </p>
+
+      <div class="code">
+        ${code}
+      </div>
+
+      <p>
+        Conservez précieusement ce code.
+      </p>
+
+      <p>
+        <b>Étape suivante :</b>
+        nous connecterons les codes à une
+        base en ligne afin que les deux PC
+        puissent communiquer.
+      </p>
+
+      <button
+        onclick="copyCode('${code}')">
+        Copier le code
+      </button>
+
+      <button onclick="home()">
+        Retour
+      </button>
+
+    </div>
+  `;
+}
+
+
+/* =========================
+   COPIER LE CODE
+========================= */
+
+function copyCode(code) {
+
+  if (navigator.clipboard) {
+
+    navigator.clipboard.writeText(code);
+
+    alert(
+      "Code copié : " + code
+    );
+
+  } else {
+
+    alert(
+      "Votre code est : " + code
+    );
+  }
+}
+
+
+/* =========================
+   LANCER LA PARTIE
+========================= */
+
+function startGame() {
+
+  const code1 =
+    document.getElementById("c1")
+      .value.trim();
+
+  const code2 =
+    document.getElementById("c2")
+      .value.trim();
+
+
+  const player1 =
+    localStorage.getItem(
+      "quiz_" + code1
+    );
+
+  const player2 =
+    localStorage.getItem(
+      "quiz_" + code2
+    );
+
+
+  if (!player1 || !player2) {
+
+    alert(
+      "Code introuvable sur ce PC.\n\n" +
+      "La prochaine étape permettra " +
+      "aux codes de fonctionner entre " +
+      "deux PC différents."
+    );
+
+    return;
+  }
+
+
+  state.game = {
+
+    players: [
+      JSON.parse(player1),
+      JSON.parse(player2)
+    ],
+
+    turn: 0,
+
+    index: 0,
+
+    score: [0, 0]
+  };
+
+
+  showQuestion();
+}
+
+
+/* =========================
+   AFFICHER UNE QUESTION
+========================= */
+
+function showQuestion() {
+
+  const game = state.game;
+
+  const player =
+    game.players[game.turn];
+
+  const question =
+    player.qs[game.index];
+
+
+  app.innerHTML = `
+
+    <div class="card">
+
+      <p>
+        Tour de
+        <b>${escapeHTML(player.name)}</b>
+      </p>
+
+      <p>
+        Question ${game.index + 1} / 30
+      </p>
+
+      <h2>
+        ${escapeHTML(question.q)}
+      </h2>
+
+      ${question.a.map(
+        (answer, i) => `
+
+          <button
+            class="answer"
+            onclick="answerQuestion(${i})">
+
+            ${String.fromCharCode(65 + i)}.
+            ${escapeHTML(answer)}
+
+          </button>
+
+        `
+      ).join("")}
+
+    </div>
+  `;
+}
+
+
+/* =========================
+   REPONSE
+========================= */
+
+function answerQuestion(answer) {
+
+  const game = state.game;
+
+  const player =
+    game.players[game.turn];
+
+  const question =
+    player.qs[game.index];
+
+
+  if (answer === question.ok) {
+
+    game.score[game.turn]++;
+  }
+
+
+  /*
+     On change de joueur.
+  */
+
+  game.turn = 1 - game.turn;
+
+
+  /*
+     Après la réponse du joueur 2,
+     on passe à la question suivante.
+  */
+
+  if (game.turn === 0) {
+
+    game.index++;
+  }
+
+
+  /*
+     30 questions de chaque joueur.
+  */
+
+  if (game.index >= 30) {
+
+    showResults();
+
+    return;
+  }
+
+
+  showQuestion();
+}
+
+
+/* =========================
+   RESULTATS
+========================= */
+
+function showResults() {
+
+  const game = state.game;
+
+  const score1 =
+    game.score[0];
+
+  const score2 =
+    game.score[1];
+
+  const percent1 =
+    Math.round(
+      score1 / 30 * 100
+    );
+
+  const percent2 =
+    Math.round(
+      score2 / 30 * 100
+    );
+
+
+  let result = "";
+
+  if (score1 > score2) {
+
+    result =
+      `<h2>
+        ${escapeHTML(game.players[0].name)}
+        remporte la partie !
+      </h2>`;
+
+  } else if (score2 > score1) {
+
+    result =
+      `<h2>
+        ${escapeHTML(game.players[1].name)}
+        remporte la partie !
+      </h2>`;
+
+  } else {
+
+    result =
+      `<h2>
+        Égalité !
+      </h2>`;
+  }
+
+
+  app.innerHTML = `
+
+    <div class="card">
+
+      <h2>
+        Résultats
+      </h2>
+
+      <p>
+        <b>
+          ${escapeHTML(game.players[0].name)}
+        </b>
+        :
+        ${score1}/30
+        (${percent1} %)
+      </p>
+
+      <p>
+        <b>
+          ${escapeHTML(game.players[1].name)}
+        </b>
+        :
+        ${score2}/30
+        (${percent2} %)
+      </p>
+
+      ${result}
+
+      <button onclick="home()">
+        Nouvelle partie
+      </button>
+
+    </div>
+  `;
+}
+
+
+/* =========================
+   SECURITE AFFICHAGE
+========================= */
+
+function escapeHTML(text) {
+
+  return text.replace(
+    /[&<>"']/g,
+
+    function(char) {
+
+      return {
+
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+
+      }[char];
+    }
+  );
+}
+
+
+/* =========================
+   DEMARRAGE
+========================= */
+
+home();
+
+</script>
+
+</body>
+</html>
