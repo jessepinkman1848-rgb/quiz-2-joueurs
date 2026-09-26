@@ -3,90 +3,316 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Quiz 2 joueurs — V3.2</title>
+<title>Notre petit jeu — V3.3</title>
 
 <style>
+:root{
+  --ink:#26342d;
+  --muted:#66736b;
+  --paper:#fbf7ee;
+  --card:#fffdf8;
+  --sage:#718878;
+  --sage-dark:#4d6555;
+  --terracotta:#b87358;
+  --line:#ded9cc;
+  --shadow:0 14px 40px rgba(49,58,49,.10)
+}
+
+*{box-sizing:border-box}
+
 body{
-  font-family:Arial,sans-serif;
-  max-width:900px;
-  margin:auto;
-  padding:24px;
-  background:#f5f6f8;
-  color:#222;
+  margin:0;
+  min-height:100vh;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 10% 10%,rgba(113,136,120,.14),transparent 28%),
+    radial-gradient(circle at 90% 85%,rgba(184,115,88,.10),transparent 25%),
+    var(--paper)
 }
+
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.18;
+  background-image:radial-gradient(rgba(38,52,45,.18) .45px,transparent .45px);
+  background-size:7px 7px
+}
+
+#app{
+  position:relative;
+  max-width:920px;
+  margin:0 auto;
+  padding:34px 20px 60px
+}
+
+.brand{
+  text-align:center;
+  margin:10px 0 30px
+}
+
+.eyebrow{
+  text-transform:uppercase;
+  letter-spacing:.22em;
+  font-size:11px;
+  color:var(--sage-dark);
+  font-weight:700
+}
+
+.brand h1{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(36px,7vw,58px);
+  font-weight:400;
+  line-height:1;
+  margin:10px 0 8px
+}
+
+.brand .motto{
+  font-family:Georgia,"Times New Roman",serif;
+  font-style:italic;
+  color:var(--muted);
+  font-size:18px
+}
+
+.sprig{
+  color:var(--sage);
+  font-size:24px;
+  letter-spacing:8px
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px
+}
+
 .card{
-  background:white;
-  padding:24px;
-  border-radius:14px;
-  box-shadow:0 2px 12px #0001;
-  margin:16px 0;
+  background:rgba(255,253,248,.94);
+  border:1px solid rgba(222,217,204,.9);
+  border-radius:20px;
+  padding:25px;
+  box-shadow:var(--shadow);
+  margin:16px 0
 }
+
+.card.wide{
+  grid-column:1/-1
+}
+
+.card h2{
+  font-family:Georgia,"Times New Roman",serif;
+  font-weight:400;
+  font-size:27px;
+  margin:0 0 8px
+}
+
+.card p{
+  color:var(--muted);
+  line-height:1.55
+}
+
+.icon{
+  font-size:25px;
+  margin-bottom:12px
+}
+
+.note{
+  font-size:14px
+}
+
 button{
-  padding:11px 16px;
+  appearance:none;
   border:0;
-  border-radius:9px;
-  background:#222;
+  border-radius:12px;
+  padding:12px 17px;
+  background:var(--sage-dark);
   color:white;
+  font:600 14px inherit;
   cursor:pointer;
-  margin:4px;
+  margin:4px 4px 4px 0;
+  transition:transform .12s,opacity .12s,background .12s
 }
-button:hover{opacity:.85}
+
+button:hover{
+  transform:translateY(-1px);
+  opacity:.94
+}
+
 button.secondary{
-  background:#ddd;
-  color:#222;
+  background:transparent;
+  color:var(--sage-dark);
+  border:1px solid #bfc8bf
 }
+
+button.accent{
+  background:var(--terracotta)
+}
+
+button.answer{
+  display:block;
+  width:100%;
+  text-align:left;
+  background:#f5f1e7;
+  color:var(--ink);
+  border:1px solid var(--line);
+  padding:16px 18px;
+  font-weight:500;
+  margin:9px 0
+}
+
+button.answer:hover{
+  background:#ebe5d8;
+  border-color:#b8c1b8
+}
+
 input,textarea,select{
   width:100%;
   box-sizing:border-box;
-  padding:10px;
-  margin:6px 0 12px;
-  border:1px solid #ccc;
-  border-radius:8px;
-}
-.code{
-  font-size:32px;
-  font-weight:bold;
-  letter-spacing:6px;
-  text-align:center;
-  padding:15px;
-}
-.q{
-  border:1px solid #ddd;
-  padding:14px;
+  padding:12px 13px;
+  margin:6px 0 13px;
+  border:1px solid #d2cec2;
   border-radius:10px;
-  margin:10px 0;
+  background:#fffefa;
+  color:var(--ink);
+  font:inherit
 }
-.answer{
+
+input:focus,textarea:focus,select:focus{
+  outline:2px solid rgba(113,136,120,.28);
+  border-color:var(--sage)
+}
+
+.q{
+  border:1px solid var(--line);
+  background:#fffdf9;
+  padding:17px;
+  border-radius:15px;
+  margin:12px 0
+}
+
+.q b{
   display:block;
-  width:100%;
-  margin:8px 0;
-  text-align:left;
+  color:var(--sage-dark);
+  font-family:Georgia,serif;
+  font-size:17px;
+  margin-bottom:6px
 }
+
+.code{
+  font-family:Georgia,serif;
+  font-size:38px;
+  font-weight:700;
+  letter-spacing:8px;
+  text-align:center;
+  padding:18px;
+  color:var(--sage-dark)
+}
+
+.success{
+  padding:14px 16px;
+  background:#edf3ed;
+  border:1px solid #d3dfd4;
+  border-radius:11px;
+  margin:14px 0;
+  color:#405344
+}
+
 .status{
   text-align:center;
-  font-weight:bold;
+  font-weight:600;
   margin:12px;
+  color:var(--terracotta)
 }
-.success{
-  padding:12px;
-  background:#e9f7ef;
-  border-radius:8px;
-  margin:12px 0;
+
+.progress{
+  height:7px;
+  background:#e8e3d8;
+  border-radius:10px;
+  overflow:hidden;
+  margin:12px 0 24px
+}
+
+.progress span{
+  display:block;
+  height:100%;
+  background:var(--sage);
+  transition:width .2s
+}
+
+.turn{
+  display:inline-block;
+  padding:7px 11px;
+  border-radius:999px;
+  background:#edf2ed;
+  color:var(--sage-dark);
+  font-size:13px;
+  font-weight:700
+}
+
+.question{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:31px;
+  line-height:1.25;
+  font-weight:400;
+  margin:16px 0 25px
+}
+
+.scorebar{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  color:var(--muted);
+  font-size:14px
+}
+
+.scorebar b{
+  color:var(--ink)
+}
+
+.result-score{
+  font-family:Georgia,serif;
+  font-size:22px;
+  margin:14px 0
+}
+
+.footer{
+  text-align:center;
+  color:#8a8f89;
+  font-size:12px;
+  margin-top:30px
+}
+
+@media(max-width:700px){
+  .grid{
+    grid-template-columns:1fr
+  }
+
+  .card.wide{
+    grid-column:auto
+  }
+
+  #app{
+    padding:22px 14px 40px
+  }
+
+  .card{
+    padding:20px
+  }
+
+  .question{
+    font-size:25px
+  }
 }
 </style>
 </head>
 
 <body>
 
-<h1>Quiz 2 joueurs — V3.2</h1>
-
 <div id="app"></div>
 
 <script>
-
-/* =====================================================
-   SUPABASE
-===================================================== */
 
 const SUPABASE_URL =
 "https://gioxjpfypwvlhpbymsha.supabase.co";
@@ -101,32 +327,73 @@ let state = {
 };
 
 
-/* =====================================================
-   COMMUNICATION SUPABASE
-===================================================== */
+/* =========================
+   INTERFACE
+========================= */
 
-async function supabaseRpc(functionName, body){
+function shell(content){
 
-  const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/rpc/${functionName}`,
-    {
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "apikey":SUPABASE_KEY,
-        "Authorization":
-          `Bearer ${SUPABASE_KEY}`
-      },
-      body:JSON.stringify(body)
-    }
-  );
+  app.innerHTML = `
+
+  <div class="brand">
+
+    <div class="sprig">
+      ✦ ❧ ✦
+    </div>
+
+    <div class="eyebrow">
+      un jeu à deux
+    </div>
+
+    <h1>
+      Notre petit jeu
+    </h1>
+
+    <div class="motto">
+      30 questions. Deux mémoires. Une nuitée.
+    </div>
+
+  </div>
+
+  ${content}
+
+  <div class="footer">
+    V3.3 · créé pour être joué à deux
+  </div>
+
+  `;
+}
+
+
+/* =========================
+   SUPABASE
+========================= */
+
+async function supabaseRpc(functionName,body){
+
+  const response =
+    await fetch(
+      `${SUPABASE_URL}/rest/v1/rpc/${functionName}`,
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "apikey":SUPABASE_KEY,
+          "Authorization":
+            `Bearer ${SUPABASE_KEY}`
+        },
+        body:JSON.stringify(body)
+      }
+    );
 
   if(!response.ok){
 
-    const text = await response.text();
+    const text =
+      await response.text();
 
     throw new Error(
-      text || `Erreur Supabase ${response.status}`
+      text ||
+      `Erreur Supabase ${response.status}`
     );
   }
 
@@ -134,136 +401,185 @@ async function supabaseRpc(functionName, body){
 }
 
 
-/* =====================================================
+/* =========================
    ACCUEIL
-===================================================== */
+========================= */
 
 function home(){
 
-  app.innerHTML = `
+  shell(`
 
-  <div class="card">
+  <div class="grid">
 
-    <h2>Créer mon questionnaire</h2>
+    <div class="card">
 
-    <p>
-      Chaque joueur prépare ses 30 questions
-      sur son propre PC.
-    </p>
+      <div class="icon">❧</div>
 
-    <button onclick="createForm()">
-      Créer mes 30 questions
-    </button>
+      <h2>
+        Créer mes 30 questions
+      </h2>
 
-  </div>
+      <p>
+        Imaginez les questions que l'autre
+        devrait connaître. Prenez votre temps :
+        le jeu gardera vos réponses secrètes
+        jusqu'à la partie.
+      </p>
+
+      <button onclick="createForm()">
+        Commencer
+      </button>
+
+    </div>
 
 
-  <div class="card">
+    <div class="card">
 
-    <h2>Modifier mon questionnaire</h2>
+      <div class="icon">✎</div>
 
-    <p>
-      Vous avez déjà créé vos 30 questions ?
-      Entrez votre code pour les retrouver
-      et les modifier.
-    </p>
+      <h2>
+        Modifier mes questions
+      </h2>
 
-    <input
-      id="editCode"
-      maxlength="6"
-      inputmode="numeric"
-      placeholder="Votre code à 6 chiffres"
-    >
+      <p>
+        Votre questionnaire existe déjà ?
+        Retrouvez-le avec votre code et
+        corrigez ce que vous souhaitez.
+        Le code reste le même.
+      </p>
 
-    <button onclick="loadQuestionnaireForEdit()">
-      Modifier mon questionnaire
-    </button>
+      <input
+        id="editCode"
+        maxlength="6"
+        inputmode="numeric"
+        placeholder="Votre code à 6 chiffres"
+      >
 
-    <div
-      id="editStatus"
-      class="status">
+      <button onclick="loadQuestionnaireForEdit()">
+        Retrouver mon questionnaire
+      </button>
+
+      <div
+        id="editStatus"
+        class="status">
+      </div>
+
+    </div>
+
+
+    <div class="card wide">
+
+      <div class="icon">♡</div>
+
+      <h2>
+        Le moment de jouer
+      </h2>
+
+      <p>
+        Quand les deux questionnaires sont prêts,
+        réunissez-vous sur un seul écran et
+        entrez les deux codes.
+      </p>
+
+      <div class="grid">
+
+        <div>
+          <input
+            id="c1"
+            maxlength="6"
+            inputmode="numeric"
+            placeholder="Code joueur 1"
+          >
+        </div>
+
+        <div>
+          <input
+            id="c2"
+            maxlength="6"
+            inputmode="numeric"
+            placeholder="Code joueur 2"
+          >
+        </div>
+
+      </div>
+
+      <button
+        class="accent"
+        onclick="startGame()">
+
+        Lancer la partie
+
+      </button>
+
+      <div
+        id="status"
+        class="status">
+      </div>
+
     </div>
 
   </div>
 
-
-  <div class="card">
-
-    <h2>Lancer une partie</h2>
-
-    <p>
-      Sur le PC de jeu, saisissez les deux codes.
-    </p>
-
-    <input
-      id="c1"
-      maxlength="6"
-      inputmode="numeric"
-      placeholder="Code joueur 1"
-    >
-
-    <input
-      id="c2"
-      maxlength="6"
-      inputmode="numeric"
-      placeholder="Code joueur 2"
-    >
-
-    <button onclick="startGame()">
-      Lancer la partie
-    </button>
-
-    <div
-      id="status"
-      class="status">
-    </div>
-
-  </div>
-
-  `;
+  `);
 }
 
 
-/* =====================================================
-   FORMULAIRE DE CREATION
-===================================================== */
+/* =========================
+   CREATION
+========================= */
 
 function createForm(){
 
-  app.innerHTML = `
+  shell(`
 
-  <div class="card">
+  <div class="card wide">
 
-    <h2>Mes 30 questions</h2>
+    <div class="eyebrow">
+      votre carnet de questions
+    </div>
+
+    <h2>
+      Préparez vos 30 questions
+    </h2>
+
+    <p class="note">
+      Des souvenirs, des détails,
+      des petites choses que l'autre
+      devrait connaître…
+      Le contenu reste privé jusqu'au
+      moment où vous jouez.
+    </p>
 
     <input
       id="name"
-      placeholder="Nom du joueur"
+      placeholder="Votre prénom ou surnom"
     >
 
     <div id="qs"></div>
 
     <button onclick="saveQuestions()">
-      Générer mon code
+      Enregistrer et obtenir mon code
     </button>
 
     <button
       class="secondary"
       onclick="home()">
+
       Retour
+
     </button>
 
   </div>
 
-  `;
+  `);
 
   buildQuestionFields();
 }
 
 
-/* =====================================================
-   CONSTRUIRE LES 30 QUESTIONS
-===================================================== */
+/* =========================
+   QUESTIONS
+========================= */
 
 function buildQuestionFields(existing=null){
 
@@ -275,7 +591,9 @@ function buildQuestionFields(existing=null){
   for(let i=1;i<=30;i++){
 
     const item =
-      existing ? existing[i-1] : null;
+      existing ?
+      existing[i-1] :
+      null;
 
     q.innerHTML += `
 
@@ -288,7 +606,8 @@ function buildQuestionFields(existing=null){
       <textarea
         id="q${i}"
         rows="2"
-        placeholder="Votre question">${item ? escapeHTML(item.q) : ""}</textarea>
+        placeholder="Votre question"
+      >${item ? escapeHTML(item.q) : ""}</textarea>
 
       <input
         id="a${i}1"
@@ -314,17 +633,20 @@ function buildQuestionFields(existing=null){
           Bonne réponse…
         </option>
 
-        <option value="0"
+        <option
+          value="0"
           ${item && item.ok===0 ? "selected" : ""}>
           A
         </option>
 
-        <option value="1"
+        <option
+          value="1"
           ${item && item.ok===1 ? "selected" : ""}>
           B
         </option>
 
-        <option value="2"
+        <option
+          value="2"
           ${item && item.ok===2 ? "selected" : ""}>
           C
         </option>
@@ -338,9 +660,9 @@ function buildQuestionFields(existing=null){
 }
 
 
-/* =====================================================
-   COLLECTER LES 30 QUESTIONS
-===================================================== */
+/* =========================
+   COLLECTE
+========================= */
 
 function collectQuestions(){
 
@@ -396,15 +718,16 @@ function collectQuestions(){
       a:answers,
       ok:Number(correct)
     });
+
   }
 
   return questions;
 }
 
 
-/* =====================================================
-   CREATION DU QUESTIONNAIRE
-===================================================== */
+/* =========================
+   SAUVEGARDE
+========================= */
 
 async function saveQuestions(){
 
@@ -412,13 +735,14 @@ async function saveQuestions(){
     document
       .getElementById("name")
       .value
-      .trim() || "Joueur";
+      .trim() ||
+      "Joueur";
 
   const questions =
     collectQuestions();
 
-  if(!questions) return;
-
+  if(!questions)
+    return;
 
   const code =
     String(
@@ -427,7 +751,6 @@ async function saveQuestions(){
         Math.random()*900000
       )
     );
-
 
   try{
 
@@ -441,7 +764,6 @@ async function saveQuestions(){
         }
       );
 
-
     if(result === false){
 
       alert(
@@ -451,7 +773,6 @@ async function saveQuestions(){
 
       return;
     }
-
 
     showSavedCode(name,code);
 
@@ -470,23 +791,29 @@ async function saveQuestions(){
 }
 
 
-/* =====================================================
-   AFFICHER LE CODE APRES CREATION
-===================================================== */
+/* =========================
+   CODE
+========================= */
 
 function showSavedCode(name,code){
 
-  app.innerHTML = `
+  shell(`
 
-  <div class="card">
+  <div
+    class="card"
+    style="text-align:center">
+
+    <div class="icon">
+      ❧
+    </div>
 
     <h2>
-      Questionnaire enregistré
+      Votre carnet est prêt
     </h2>
 
     <p>
-      Joueur :
-      <b>${escapeHTML(name)}</b>
+      ${escapeHTML(name)},
+      votre code personnel est :
     </p>
 
     <div class="code">
@@ -494,32 +821,42 @@ function showSavedCode(name,code){
     </div>
 
     <div class="success">
-      Votre questionnaire est enregistré.
-      Vous pouvez maintenant utiliser ce code
-      pour modifier vos questions ou jouer.
+
+      Gardez précieusement ce code.
+      Il vous permettra de modifier vos
+      questions plus tard, sans créer
+      un nouveau questionnaire.
+
     </div>
 
     <button onclick="copyCode('${code}')">
       Copier le code
     </button>
 
-    <button onclick="loadQuestionnaireForEdit('${code}')">
-      ✏️ Modifier mes questions
+    <button
+      onclick="loadQuestionnaireForEdit('${code}')">
+
+      ✎ Modifier mes questions
+
     </button>
 
-    <button onclick="home()">
+    <button
+      class="secondary"
+      onclick="home()">
+
       Retour
+
     </button>
 
   </div>
 
-  `;
+  `);
 }
 
 
-/* =====================================================
-   CHARGER UN QUESTIONNAIRE
-===================================================== */
+/* =========================
+   LECTURE
+========================= */
 
 async function getQuiz(code){
 
@@ -531,7 +868,6 @@ async function getQuiz(code){
       }
     );
 
-
   if(
     !Array.isArray(result) ||
     result.length === 0
@@ -539,7 +875,6 @@ async function getQuiz(code){
 
     return null;
   }
-
 
   return {
 
@@ -553,19 +888,21 @@ async function getQuiz(code){
 }
 
 
-/* =====================================================
-   MODIFIER UN QUESTIONNAIRE
-===================================================== */
+/* =========================
+   MODIFICATION
+========================= */
 
-async function loadQuestionnaireForEdit(codeFromButton=null){
+async function loadQuestionnaireForEdit(
+  codeFromButton=null
+){
 
   const code =
     codeFromButton ||
-    document
-      .getElementById("editCode")
-      .value
-      .trim();
-
+    (
+      document.getElementById("editCode") ?
+      document.getElementById("editCode").value.trim() :
+      ""
+    );
 
   if(!/^\d{6}$/.test(code)){
 
@@ -576,12 +913,10 @@ async function loadQuestionnaireForEdit(codeFromButton=null){
     return;
   }
 
-
   try{
 
     const quiz =
       await getQuiz(code);
-
 
     if(!quiz){
 
@@ -592,7 +927,6 @@ async function loadQuestionnaireForEdit(codeFromButton=null){
 
       return;
     }
-
 
     if(
       !Array.isArray(quiz.qs) ||
@@ -607,10 +941,13 @@ async function loadQuestionnaireForEdit(codeFromButton=null){
       return;
     }
 
+    shell(`
 
-    app.innerHTML = `
+    <div class="card wide">
 
-    <div class="card">
+      <div class="eyebrow">
+        édition privée
+      </div>
 
       <h2>
         Modifier mon questionnaire
@@ -619,17 +956,17 @@ async function loadQuestionnaireForEdit(codeFromButton=null){
       <p>
         Joueur :
         <b>${escapeHTML(quiz.name)}</b>
-      </p>
-
-      <p>
-        Code :
+        · Code :
         <b>${code}</b>
       </p>
 
       <div class="success">
-        Modifiez les questions souhaitées.
-        Votre code restera
-        <b>${code}</b>.
+
+        Modifiez ce que vous souhaitez.
+        Votre code
+        <b>${code}</b>
+        restera inchangé.
+
       </div>
 
       <input
@@ -643,7 +980,7 @@ async function loadQuestionnaireForEdit(codeFromButton=null){
       <button
         onclick="updateQuestions('${code}')">
 
-        💾 Enregistrer les modifications
+        Enregistrer les modifications
 
       </button>
 
@@ -657,8 +994,7 @@ async function loadQuestionnaireForEdit(codeFromButton=null){
 
     </div>
 
-    `;
-
+    `);
 
     buildQuestionFields(quiz.qs);
 
@@ -677,9 +1013,9 @@ async function loadQuestionnaireForEdit(codeFromButton=null){
 }
 
 
-/* =====================================================
-   ENREGISTRER UNE MODIFICATION
-===================================================== */
+/* =========================
+   MISE A JOUR
+========================= */
 
 async function updateQuestions(code){
 
@@ -687,15 +1023,14 @@ async function updateQuestions(code){
     document
       .getElementById("name")
       .value
-      .trim() || "Joueur";
-
+      .trim() ||
+      "Joueur";
 
   const questions =
     collectQuestions();
 
-
-  if(!questions) return;
-
+  if(!questions)
+    return;
 
   try{
 
@@ -709,7 +1044,6 @@ async function updateQuestions(code){
         }
       );
 
-
     if(result !== true){
 
       alert(
@@ -720,21 +1054,23 @@ async function updateQuestions(code){
       return;
     }
 
+    shell(`
 
-    app.innerHTML = `
+    <div
+      class="card"
+      style="text-align:center">
 
-    <div class="card">
+      <div class="icon">
+        ✦
+      </div>
 
       <h2>
-        ✅ Modifications enregistrées
+        Modifications enregistrées
       </h2>
 
       <p>
-        Votre questionnaire a été mis à jour.
-      </p>
-
-      <p>
-        Votre code reste :
+        Tout est prêt,
+        et votre code reste :
       </p>
 
       <div class="code">
@@ -744,11 +1080,13 @@ async function updateQuestions(code){
       <button
         onclick="loadQuestionnaireForEdit('${code}')">
 
-        ✏️ Modifier encore
+        Modifier encore
 
       </button>
 
-      <button onclick="home()">
+      <button
+        class="secondary"
+        onclick="home()">
 
         Retour à l'accueil
 
@@ -756,7 +1094,7 @@ async function updateQuestions(code){
 
     </div>
 
-    `;
+    `);
 
   }
 
@@ -773,9 +1111,9 @@ async function updateQuestions(code){
 }
 
 
-/* =====================================================
-   COPIER LE CODE
-===================================================== */
+/* =========================
+   COPIE
+========================= */
 
 function copyCode(code){
 
@@ -784,14 +1122,16 @@ function copyCode(code){
     navigator.clipboard
       .writeText(code)
       .then(
-        ()=>alert(
-          "Code copié : " + code
-        )
+        () =>
+          alert(
+            "Code copié : " + code
+          )
       )
       .catch(
-        ()=>alert(
-          "Votre code est : " + code
-        )
+        () =>
+          alert(
+            "Votre code est : " + code
+          )
       );
 
   }else{
@@ -803,9 +1143,9 @@ function copyCode(code){
 }
 
 
-/* =====================================================
-   LANCER LA PARTIE
-===================================================== */
+/* =========================
+   PARTIE
+========================= */
 
 async function startGame(){
 
@@ -815,18 +1155,15 @@ async function startGame(){
       .value
       .trim();
 
-
   const code2 =
     document
       .getElementById("c2")
       .value
       .trim();
 
-
   const status =
     document
       .getElementById("status");
-
 
   if(
     !/^\d{6}$/.test(code1) ||
@@ -839,10 +1176,8 @@ async function startGame(){
     return;
   }
 
-
   status.textContent =
-    "Récupération des questionnaires…";
-
+    "Les deux carnets arrivent…";
 
   try{
 
@@ -853,11 +1188,9 @@ async function startGame(){
       await Promise.all([
 
         getQuiz(code1),
-
         getQuiz(code2)
 
       ]);
-
 
     if(!player1){
 
@@ -867,7 +1200,6 @@ async function startGame(){
       return;
     }
 
-
     if(!player2){
 
       status.textContent =
@@ -875,7 +1207,6 @@ async function startGame(){
 
       return;
     }
-
 
     if(
       !Array.isArray(player1.qs) ||
@@ -889,7 +1220,6 @@ async function startGame(){
 
       return;
     }
-
 
     state.game = {
 
@@ -909,7 +1239,6 @@ async function startGame(){
 
     };
 
-
     showQuestion();
 
   }
@@ -919,7 +1248,7 @@ async function startGame(){
     console.error(error);
 
     status.textContent =
-      "Erreur de connexion à la base de données.";
+      "Erreur de connexion.";
 
     alert(
       "Impossible de récupérer " +
@@ -930,48 +1259,88 @@ async function startGame(){
 }
 
 
-/* =====================================================
+/* =========================
    QUESTION
-===================================================== */
+========================= */
 
 function showQuestion(){
 
   const game =
     state.game;
 
-
   const player =
     game.players[
       game.turn
     ];
-
 
   const question =
     player.qs[
       game.index
     ];
 
+  const totalAnswered =
+    game.index * 2 +
+    game.turn;
 
-  app.innerHTML = `
+  const progress =
+    Math.round(
+      totalAnswered / 60 * 100
+    );
+
+  shell(`
 
   <div class="card">
 
-    <p>
-      Tour de
-      <b>
-        ${escapeHTML(player.name)}
-      </b>
-    </p>
+    <div class="scorebar">
 
-    <p>
-      Question
-      ${game.index+1}
-      / 30
-    </p>
+      <span>
+        Question
+        ${game.index+1}
+        / 30
+      </span>
 
-    <h2>
+      <span>
+
+        <b>
+          ${escapeHTML(
+            game.players[0].name
+          )}
+        </b>
+
+        ${game.score[0]}
+
+        ·
+
+        ${game.score[1]}
+
+        <b>
+          ${escapeHTML(
+            game.players[1].name
+          )}
+        </b>
+
+      </span>
+
+    </div>
+
+    <div class="progress">
+      <span
+        style="width:${progress}%">
+      </span>
+    </div>
+
+    <span class="turn">
+
+      Au tour de
+      ${escapeHTML(player.name)}
+
+    </span>
+
+    <div class="question">
+
       ${escapeHTML(question.q)}
-    </h2>
+
+    </div>
 
     ${
       question.a.map(
@@ -981,7 +1350,10 @@ function showQuestion(){
           class="answer"
           onclick="answerQuestion(${i})">
 
-          ${String.fromCharCode(65+i)}.
+          <b>
+            ${String.fromCharCode(65+i)}.
+          </b>
+
           ${escapeHTML(answer)}
 
         </button>
@@ -992,33 +1364,32 @@ function showQuestion(){
 
   </div>
 
-  `;
+  `);
 }
 
 
-/* =====================================================
+/* =========================
    REPONSE
-===================================================== */
+========================= */
 
 function answerQuestion(answer){
 
   const game =
     state.game;
 
-
   const player =
     game.players[
       game.turn
     ];
-
 
   const question =
     player.qs[
       game.index
     ];
 
-
-  if(answer === question.ok){
+  if(
+    answer === question.ok
+  ){
 
     game.score[
       game.turn
@@ -1026,17 +1397,14 @@ function answerQuestion(answer){
 
   }
 
-
   game.turn =
     1 - game.turn;
-
 
   if(game.turn === 0){
 
     game.index++;
 
   }
-
 
   if(game.index >= 30){
 
@@ -1045,67 +1413,60 @@ function answerQuestion(answer){
     return;
   }
 
-
   showQuestion();
 }
 
 
-/* =====================================================
+/* =========================
    RESULTATS
-===================================================== */
+========================= */
 
 function showResults(){
 
   const game =
     state.game;
 
-
   const score1 =
     game.score[0];
 
-
   const score2 =
     game.score[1];
-
 
   const percent1 =
     Math.round(
       score1 / 30 * 100
     );
 
-
   const percent2 =
     Math.round(
       score2 / 30 * 100
     );
 
-
   let result;
-
 
   if(score1 > score2){
 
     result = `
       <h2>
-        ${escapeHTML(game.players[0].name)}
+        ${escapeHTML(
+          game.players[0].name
+        )}
         remporte la partie !
       </h2>
     `;
 
-  }
-
-  else if(score2 > score1){
+  }else if(score2 > score1){
 
     result = `
       <h2>
-        ${escapeHTML(game.players[1].name)}
+        ${escapeHTML(
+          game.players[1].name
+        )}
         remporte la partie !
       </h2>
     `;
 
-  }
-
-  else{
+  }else{
 
     result = `
       <h2>
@@ -1114,67 +1475,75 @@ function showResults(){
     `;
   }
 
+  shell(`
 
-  app.innerHTML = `
+  <div
+    class="card"
+    style="text-align:center">
 
-  <div class="card">
+    <div class="sprig">
+      ✦ ❧ ✦
+    </div>
 
     <h2>
-      Résultats
+      La nuitée touche à sa fin
     </h2>
 
-    <p>
+    <p class="result-score">
+
       <b>
         ${escapeHTML(
           game.players[0].name
         )}
       </b>
-      :
-      ${score1}/30
-      (${percent1} %)
+
+      · ${score1}/30
+      · ${percent1} %
+
     </p>
 
-    <p>
+    <p class="result-score">
+
       <b>
         ${escapeHTML(
           game.players[1].name
         )}
       </b>
-      :
-      ${score2}/30
-      (${percent2} %)
+
+      · ${score2}/30
+      · ${percent2} %
+
     </p>
 
     ${result}
 
     <button onclick="home()">
-      Nouvelle partie
+      Une autre partie
     </button>
 
   </div>
 
-  `;
+  `);
 }
 
 
-/* =====================================================
+/* =========================
    SECURITE
-===================================================== */
+========================= */
 
 function escapeHTML(text){
 
   return String(text).replace(
     /[&<>"']/g,
 
-    char => ({
-
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#39;"
-
-    }[char])
+    char =>
+      ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#39;"
+      }[char])
   );
 }
 
@@ -1186,9 +1555,9 @@ function escapeAttribute(text){
 }
 
 
-/* =====================================================
+/* =========================
    DEMARRAGE
-===================================================== */
+========================= */
 
 home();
 
