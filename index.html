@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Quiz 2 joueurs — V3.1</title>
+<title>Quiz 2 joueurs — V3.2</title>
 
 <style>
 body{
@@ -14,7 +14,6 @@ body{
   background:#f5f6f8;
   color:#222;
 }
-
 .card{
   background:white;
   padding:24px;
@@ -22,7 +21,6 @@ body{
   box-shadow:0 2px 12px #0001;
   margin:16px 0;
 }
-
 button{
   padding:11px 16px;
   border:0;
@@ -32,16 +30,11 @@ button{
   cursor:pointer;
   margin:4px;
 }
-
-button:hover{
-  opacity:.85;
-}
-
+button:hover{opacity:.85}
 button.secondary{
   background:#ddd;
   color:#222;
 }
-
 input,textarea,select{
   width:100%;
   box-sizing:border-box;
@@ -50,7 +43,6 @@ input,textarea,select{
   border:1px solid #ccc;
   border-radius:8px;
 }
-
 .code{
   font-size:32px;
   font-weight:bold;
@@ -58,32 +50,35 @@ input,textarea,select{
   text-align:center;
   padding:15px;
 }
-
 .q{
   border:1px solid #ddd;
   padding:14px;
   border-radius:10px;
   margin:10px 0;
 }
-
 .answer{
   display:block;
   width:100%;
   margin:8px 0;
   text-align:left;
 }
-
 .status{
   text-align:center;
   font-weight:bold;
   margin:12px;
+}
+.success{
+  padding:12px;
+  background:#e9f7ef;
+  border-radius:8px;
+  margin:12px 0;
 }
 </style>
 </head>
 
 <body>
 
-<h1>Quiz 2 joueurs — V3.1</h1>
+<h1>Quiz 2 joueurs — V3.2</h1>
 
 <div id="app"></div>
 
@@ -99,10 +94,7 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
 "sb_publishable_lT9U7gXoxfhnki85LXOx0w_JORRoKwj";
 
-
-const app =
-document.getElementById("app");
-
+const app = document.getElementById("app");
 
 let state = {
   game:null
@@ -110,7 +102,7 @@ let state = {
 
 
 /* =====================================================
-   COMMUNICATION AVEC SUPABASE
+   COMMUNICATION SUPABASE
 ===================================================== */
 
 async function supabaseRpc(functionName, body){
@@ -119,30 +111,24 @@ async function supabaseRpc(functionName, body){
     `${SUPABASE_URL}/rest/v1/rpc/${functionName}`,
     {
       method:"POST",
-
       headers:{
         "Content-Type":"application/json",
         "apikey":SUPABASE_KEY,
         "Authorization":
           `Bearer ${SUPABASE_KEY}`
       },
-
       body:JSON.stringify(body)
     }
   );
 
-
   if(!response.ok){
 
-    const text =
-      await response.text();
+    const text = await response.text();
 
     throw new Error(
-      text ||
-      `Erreur Supabase ${response.status}`
+      text || `Erreur Supabase ${response.status}`
     );
   }
-
 
   return response.json();
 }
@@ -158,13 +144,11 @@ function home(){
 
   <div class="card">
 
-    <h2>
-      Créer mon questionnaire
-    </h2>
+    <h2>Créer mon questionnaire</h2>
 
     <p>
-      Chaque joueur prépare ses
-      30 questions sur son propre PC.
+      Chaque joueur prépare ses 30 questions
+      sur son propre PC.
     </p>
 
     <button onclick="createForm()">
@@ -176,13 +160,39 @@ function home(){
 
   <div class="card">
 
-    <h2>
-      Lancer une partie
-    </h2>
+    <h2>Modifier mon questionnaire</h2>
 
     <p>
-      Sur le PC de jeu, saisissez
-      les deux codes.
+      Vous avez déjà créé vos 30 questions ?
+      Entrez votre code pour les retrouver
+      et les modifier.
+    </p>
+
+    <input
+      id="editCode"
+      maxlength="6"
+      inputmode="numeric"
+      placeholder="Votre code à 6 chiffres"
+    >
+
+    <button onclick="loadQuestionnaireForEdit()">
+      Modifier mon questionnaire
+    </button>
+
+    <div
+      id="editStatus"
+      class="status">
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <h2>Lancer une partie</h2>
+
+    <p>
+      Sur le PC de jeu, saisissez les deux codes.
     </p>
 
     <input
@@ -215,7 +225,7 @@ function home(){
 
 
 /* =====================================================
-   CREATION DU QUESTIONNAIRE
+   FORMULAIRE DE CREATION
 ===================================================== */
 
 function createForm(){
@@ -224,9 +234,7 @@ function createForm(){
 
   <div class="card">
 
-    <h2>
-      Mes 30 questions
-    </h2>
+    <h2>Mes 30 questions</h2>
 
     <input
       id="name"
@@ -242,21 +250,32 @@ function createForm(){
     <button
       class="secondary"
       onclick="home()">
-
       Retour
-
     </button>
 
   </div>
 
   `;
 
+  buildQuestionFields();
+}
+
+
+/* =====================================================
+   CONSTRUIRE LES 30 QUESTIONS
+===================================================== */
+
+function buildQuestionFields(existing=null){
 
   const q =
     document.getElementById("qs");
 
+  q.innerHTML = "";
 
   for(let i=1;i<=30;i++){
+
+    const item =
+      existing ? existing[i-1] : null;
 
     q.innerHTML += `
 
@@ -269,22 +288,24 @@ function createForm(){
       <textarea
         id="q${i}"
         rows="2"
-        placeholder="Votre question">
-      </textarea>
+        placeholder="Votre question">${item ? escapeHTML(item.q) : ""}</textarea>
 
       <input
         id="a${i}1"
         placeholder="Réponse A"
+        value="${item ? escapeAttribute(item.a[0]) : ""}"
       >
 
       <input
         id="a${i}2"
         placeholder="Réponse B"
+        value="${item ? escapeAttribute(item.a[1]) : ""}"
       >
 
       <input
         id="a${i}3"
         placeholder="Réponse C"
+        value="${item ? escapeAttribute(item.a[2]) : ""}"
       >
 
       <select id="ok${i}">
@@ -293,15 +314,18 @@ function createForm(){
           Bonne réponse…
         </option>
 
-        <option value="0">
+        <option value="0"
+          ${item && item.ok===0 ? "selected" : ""}>
           A
         </option>
 
-        <option value="1">
+        <option value="1"
+          ${item && item.ok===1 ? "selected" : ""}>
           B
         </option>
 
-        <option value="2">
+        <option value="2"
+          ${item && item.ok===2 ? "selected" : ""}>
           C
         </option>
 
@@ -315,20 +339,12 @@ function createForm(){
 
 
 /* =====================================================
-   ENREGISTRER LE QUESTIONNAIRE
+   COLLECTER LES 30 QUESTIONS
 ===================================================== */
 
-async function saveQuestions(){
-
-  const name =
-    document
-      .getElementById("name")
-      .value
-      .trim() || "Joueur";
-
+function collectQuestions(){
 
   let questions = [];
-
 
   for(let i=1;i<=30;i++){
 
@@ -337,7 +353,6 @@ async function saveQuestions(){
         .getElementById("q"+i)
         .value
         .trim();
-
 
     const answers = [
 
@@ -358,12 +373,10 @@ async function saveQuestions(){
 
     ];
 
-
     const correct =
       document
         .getElementById("ok"+i)
         .value;
-
 
     if(
       !text ||
@@ -375,25 +388,37 @@ async function saveQuestions(){
         `Merci de compléter la question ${i}.`
       );
 
-      return;
+      return null;
     }
 
-
     questions.push({
-
       q:text,
-
       a:answers,
-
       ok:Number(correct)
-
     });
   }
 
+  return questions;
+}
 
-  /*
-     Génération du code à 6 chiffres
-  */
+
+/* =====================================================
+   CREATION DU QUESTIONNAIRE
+===================================================== */
+
+async function saveQuestions(){
+
+  const name =
+    document
+      .getElementById("name")
+      .value
+      .trim() || "Joueur";
+
+  const questions =
+    collectQuestions();
+
+  if(!questions) return;
+
 
   const code =
     String(
@@ -406,73 +431,29 @@ async function saveQuestions(){
 
   try{
 
-    await supabaseRpc(
-
-      "save_quiz",
-
-      {
-        p_code:code,
-
-        p_player_name:name,
-
-        p_questions:questions
-      }
-
-    );
+    const result =
+      await supabaseRpc(
+        "save_quiz",
+        {
+          p_code:code,
+          p_player_name:name,
+          p_questions:questions
+        }
+      );
 
 
-    app.innerHTML = `
+    if(result === false){
 
-    <div class="card">
+      alert(
+        "Ce code existe déjà. " +
+        "Veuillez réessayer."
+      );
 
-      <h2>
-        Questionnaire enregistré
-      </h2>
-
-      <p>
-        Joueur :
-        <b>
-          ${escapeHTML(name)}
-        </b>
-      </p>
+      return;
+    }
 
 
-      <div class="code">
-        ${code}
-      </div>
-
-
-      <p>
-        <b>
-          Conservez ce code !
-        </b>
-      </p>
-
-
-      <p>
-        Ce code peut maintenant être
-        utilisé sur un autre PC.
-      </p>
-
-
-      <button
-        onclick="copyCode('${code}')">
-
-        Copier le code
-
-      </button>
-
-
-      <button
-        onclick="home()">
-
-        Retour
-
-      </button>
-
-    </div>
-
-    `;
+    showSavedCode(name,code);
 
   }
 
@@ -485,59 +466,69 @@ async function saveQuestions(){
       "le questionnaire.\n\n" +
       error.message
     );
-
   }
 }
 
 
 /* =====================================================
-   COPIER LE CODE
+   AFFICHER LE CODE APRES CREATION
 ===================================================== */
 
-function copyCode(code){
+function showSavedCode(name,code){
 
-  if(navigator.clipboard){
+  app.innerHTML = `
 
-    navigator.clipboard
-      .writeText(code)
-      .then(
-        ()=>alert(
-          "Code copié : "+code
-        )
-      )
-      .catch(
-        ()=>alert(
-          "Votre code est : "+code
-        )
-      );
+  <div class="card">
 
-  }
+    <h2>
+      Questionnaire enregistré
+    </h2>
 
-  else{
+    <p>
+      Joueur :
+      <b>${escapeHTML(name)}</b>
+    </p>
 
-    alert(
-      "Votre code est : "+code
-    );
+    <div class="code">
+      ${code}
+    </div>
 
-  }
+    <div class="success">
+      Votre questionnaire est enregistré.
+      Vous pouvez maintenant utiliser ce code
+      pour modifier vos questions ou jouer.
+    </div>
+
+    <button onclick="copyCode('${code}')">
+      Copier le code
+    </button>
+
+    <button onclick="loadQuestionnaireForEdit('${code}')">
+      ✏️ Modifier mes questions
+    </button>
+
+    <button onclick="home()">
+      Retour
+    </button>
+
+  </div>
+
+  `;
 }
 
 
 /* =====================================================
-   RECUPERER UN QUESTIONNAIRE
+   CHARGER UN QUESTIONNAIRE
 ===================================================== */
 
 async function getQuiz(code){
 
   const result =
     await supabaseRpc(
-
       "get_quiz",
-
       {
         p_code:code
       }
-
     );
 
 
@@ -559,6 +550,256 @@ async function getQuiz(code){
       result[0].questions
 
   };
+}
+
+
+/* =====================================================
+   MODIFIER UN QUESTIONNAIRE
+===================================================== */
+
+async function loadQuestionnaireForEdit(codeFromButton=null){
+
+  const code =
+    codeFromButton ||
+    document
+      .getElementById("editCode")
+      .value
+      .trim();
+
+
+  if(!/^\d{6}$/.test(code)){
+
+    alert(
+      "Veuillez saisir un code à 6 chiffres."
+    );
+
+    return;
+  }
+
+
+  try{
+
+    const quiz =
+      await getQuiz(code);
+
+
+    if(!quiz){
+
+      alert(
+        "Aucun questionnaire trouvé " +
+        "avec ce code."
+      );
+
+      return;
+    }
+
+
+    if(
+      !Array.isArray(quiz.qs) ||
+      quiz.qs.length !== 30
+    ){
+
+      alert(
+        "Ce questionnaire ne contient " +
+        "pas exactement 30 questions."
+      );
+
+      return;
+    }
+
+
+    app.innerHTML = `
+
+    <div class="card">
+
+      <h2>
+        Modifier mon questionnaire
+      </h2>
+
+      <p>
+        Joueur :
+        <b>${escapeHTML(quiz.name)}</b>
+      </p>
+
+      <p>
+        Code :
+        <b>${code}</b>
+      </p>
+
+      <div class="success">
+        Modifiez les questions souhaitées.
+        Votre code restera
+        <b>${code}</b>.
+      </div>
+
+      <input
+        id="name"
+        value="${escapeAttribute(quiz.name)}"
+        placeholder="Nom du joueur"
+      >
+
+      <div id="qs"></div>
+
+      <button
+        onclick="updateQuestions('${code}')">
+
+        💾 Enregistrer les modifications
+
+      </button>
+
+      <button
+        class="secondary"
+        onclick="home()">
+
+        Annuler
+
+      </button>
+
+    </div>
+
+    `;
+
+
+    buildQuestionFields(quiz.qs);
+
+  }
+
+  catch(error){
+
+    console.error(error);
+
+    alert(
+      "Impossible de récupérer " +
+      "le questionnaire.\n\n" +
+      error.message
+    );
+  }
+}
+
+
+/* =====================================================
+   ENREGISTRER UNE MODIFICATION
+===================================================== */
+
+async function updateQuestions(code){
+
+  const name =
+    document
+      .getElementById("name")
+      .value
+      .trim() || "Joueur";
+
+
+  const questions =
+    collectQuestions();
+
+
+  if(!questions) return;
+
+
+  try{
+
+    const result =
+      await supabaseRpc(
+        "update_quiz",
+        {
+          p_code:code,
+          p_player_name:name,
+          p_questions:questions
+        }
+      );
+
+
+    if(result !== true){
+
+      alert(
+        "Impossible de modifier " +
+        "ce questionnaire."
+      );
+
+      return;
+    }
+
+
+    app.innerHTML = `
+
+    <div class="card">
+
+      <h2>
+        ✅ Modifications enregistrées
+      </h2>
+
+      <p>
+        Votre questionnaire a été mis à jour.
+      </p>
+
+      <p>
+        Votre code reste :
+      </p>
+
+      <div class="code">
+        ${code}
+      </div>
+
+      <button
+        onclick="loadQuestionnaireForEdit('${code}')">
+
+        ✏️ Modifier encore
+
+      </button>
+
+      <button onclick="home()">
+
+        Retour à l'accueil
+
+      </button>
+
+    </div>
+
+    `;
+
+  }
+
+  catch(error){
+
+    console.error(error);
+
+    alert(
+      "Impossible d'enregistrer " +
+      "les modifications.\n\n" +
+      error.message
+    );
+  }
+}
+
+
+/* =====================================================
+   COPIER LE CODE
+===================================================== */
+
+function copyCode(code){
+
+  if(navigator.clipboard){
+
+    navigator.clipboard
+      .writeText(code)
+      .then(
+        ()=>alert(
+          "Code copié : " + code
+        )
+      )
+      .catch(
+        ()=>alert(
+          "Votre code est : " + code
+        )
+      );
+
+  }else{
+
+    alert(
+      "Votre code est : " + code
+    );
+  }
 }
 
 
@@ -685,13 +926,12 @@ async function startGame(){
       "les questionnaires.\n\n" +
       error.message
     );
-
   }
 }
 
 
 /* =====================================================
-   AFFICHER UNE QUESTION
+   QUESTION
 ===================================================== */
 
 function showQuestion(){
@@ -723,18 +963,15 @@ function showQuestion(){
       </b>
     </p>
 
-
     <p>
       Question
       ${game.index+1}
       / 30
     </p>
 
-
     <h2>
       ${escapeHTML(question.q)}
     </h2>
-
 
     ${
       question.a.map(
@@ -781,9 +1018,7 @@ function answerQuestion(answer){
     ];
 
 
-  if(
-    answer === question.ok
-  ){
+  if(answer === question.ok){
 
     game.score[
       game.turn
@@ -792,40 +1027,22 @@ function answerQuestion(answer){
   }
 
 
-  /*
-     Changement de joueur
-  */
-
   game.turn =
     1 - game.turn;
 
 
-  /*
-     Après le joueur 2,
-     on passe à la question suivante.
-  */
-
-  if(
-    game.turn === 0
-  ){
+  if(game.turn === 0){
 
     game.index++;
 
   }
 
 
-  /*
-     Fin après 30 questions
-  */
-
-  if(
-    game.index >= 30
-  ){
+  if(game.index >= 30){
 
     showResults();
 
     return;
-
   }
 
 
@@ -869,14 +1086,10 @@ function showResults(){
   if(score1 > score2){
 
     result = `
-
       <h2>
-        ${escapeHTML(
-          game.players[0].name
-        )}
+        ${escapeHTML(game.players[0].name)}
         remporte la partie !
       </h2>
-
     `;
 
   }
@@ -884,14 +1097,10 @@ function showResults(){
   else if(score2 > score1){
 
     result = `
-
       <h2>
-        ${escapeHTML(
-          game.players[1].name
-        )}
+        ${escapeHTML(game.players[1].name)}
         remporte la partie !
       </h2>
-
     `;
 
   }
@@ -899,13 +1108,10 @@ function showResults(){
   else{
 
     result = `
-
       <h2>
         Égalité !
       </h2>
-
     `;
-
   }
 
 
@@ -917,49 +1123,32 @@ function showResults(){
       Résultats
     </h2>
 
-
     <p>
-
       <b>
         ${escapeHTML(
           game.players[0].name
         )}
       </b>
-
       :
-
       ${score1}/30
-
       (${percent1} %)
-
     </p>
 
-
     <p>
-
       <b>
         ${escapeHTML(
           game.players[1].name
         )}
       </b>
-
       :
-
       ${score2}/30
-
       (${percent2} %)
-
     </p>
-
 
     ${result}
 
-
-    <button
-      onclick="home()">
-
+    <button onclick="home()">
       Nouvelle partie
-
     </button>
 
   </div>
@@ -986,9 +1175,14 @@ function escapeHTML(text){
       "'":"&#39;"
 
     }[char])
-
   );
+}
 
+
+function escapeAttribute(text){
+
+  return escapeHTML(text)
+    .replace(/\n/g," ");
 }
 
 
