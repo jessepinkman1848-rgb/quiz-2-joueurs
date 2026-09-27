@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Notre petit jeu — V3.3</title>
+<title>Notre petit jeu — V3.4</title>
 
 <style>
 :root{
@@ -132,7 +132,7 @@ button{
   font:600 14px inherit;
   cursor:pointer;
   margin:4px 4px 4px 0;
-  transition:transform .12s,opacity .12s,background .12s
+  transition:transform .12s,opacity .12s
 }
 
 button:hover{
@@ -163,8 +163,7 @@ button.answer{
 }
 
 button.answer:hover{
-  background:#ebe5d8;
-  border-color:#b8c1b8
+  background:#ebe5d8
 }
 
 input,textarea,select{
@@ -198,6 +197,17 @@ input:focus,textarea:focus,select:focus{
   font-family:Georgia,serif;
   font-size:17px;
   margin-bottom:6px
+}
+
+.newblock{
+  margin:30px 0 14px;
+  padding:15px 18px;
+  border-radius:14px;
+  background:#edf2ed;
+  color:var(--sage-dark);
+  text-align:center;
+  font-family:Georgia,serif;
+  font-size:20px
 }
 
 .code{
@@ -320,11 +330,35 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
 "sb_publishable_lT9U7gXoxfhnki85LXOx0w_JORRoKwj";
 
-const app = document.getElementById("app");
+const TOTAL = 50;
+
+const app =
+document.getElementById("app");
 
 let state = {
   game:null
 };
+
+
+/* =========================
+   OUTILS
+========================= */
+
+function escapeHTML(text){
+
+  return String(text).replace(
+    /[&<>"']/g,
+
+    char =>
+      ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#39;"
+      }[char])
+  );
+}
 
 
 /* =========================
@@ -350,7 +384,7 @@ function shell(content){
     </h1>
 
     <div class="motto">
-      30 questions. Deux mémoires. Une nuitée.
+      50 questions. Deux mémoires. Une nuitée.
     </div>
 
   </div>
@@ -358,7 +392,7 @@ function shell(content){
   ${content}
 
   <div class="footer">
-    V3.3 · créé pour être joué à deux
+    V3.4 · créé pour être joué à deux
   </div>
 
   `;
@@ -376,12 +410,14 @@ async function supabaseRpc(functionName,body){
       `${SUPABASE_URL}/rest/v1/rpc/${functionName}`,
       {
         method:"POST",
+
         headers:{
           "Content-Type":"application/json",
           "apikey":SUPABASE_KEY,
           "Authorization":
             `Bearer ${SUPABASE_KEY}`
         },
+
         body:JSON.stringify(body)
       }
     );
@@ -416,14 +452,13 @@ function home(){
       <div class="icon">❧</div>
 
       <h2>
-        Créer mes 30 questions
+        Créer mes 50 questions
       </h2>
 
       <p>
-        Imaginez les questions que l'autre
-        devrait connaître. Prenez votre temps :
-        le jeu gardera vos réponses secrètes
-        jusqu'à la partie.
+        Préparez votre questionnaire.
+        Les réponses restent secrètes
+        jusqu'au moment de la partie.
       </p>
 
       <button onclick="createForm()">
@@ -442,10 +477,9 @@ function home(){
       </h2>
 
       <p>
-        Votre questionnaire existe déjà ?
-        Retrouvez-le avec votre code et
-        corrigez ce que vous souhaitez.
-        Le code reste le même.
+        Retrouvez votre questionnaire
+        avec votre code. Vos 30 premières
+        questions resteront intactes.
       </p>
 
       <input
@@ -539,15 +573,14 @@ function createForm(){
     </div>
 
     <h2>
-      Préparez vos 30 questions
+      Préparez vos 50 questions
     </h2>
 
     <p class="note">
-      Des souvenirs, des détails,
-      des petites choses que l'autre
-      devrait connaître…
-      Le contenu reste privé jusqu'au
-      moment où vous jouez.
+      50 questions par joueur.
+      Si vous modifiez un questionnaire
+      existant, les 30 premières questions
+      seront conservées.
     </p>
 
     <input
@@ -578,24 +611,53 @@ function createForm(){
 
 
 /* =========================
-   QUESTIONS
+   CHAMPS QUESTIONS
 ========================= */
 
 function buildQuestionFields(existing=null){
 
-  const q =
+  const container =
     document.getElementById("qs");
 
-  q.innerHTML = "";
+  container.innerHTML = "";
 
-  for(let i=1;i<=30;i++){
+  for(let i=1;i<=TOTAL;i++){
+
+    if(i===31){
+
+      container.innerHTML += `
+
+      <div class="newblock">
+
+        ✦ 20 nouvelles questions
+        · questions 31 à 50 ✦
+
+      </div>
+
+      `;
+    }
 
     const item =
-      existing ?
-      existing[i-1] :
+      existing &&
+      existing[i-1]
+      ?
+      existing[i-1]
+      :
       null;
 
-    q.innerHTML += `
+    const qText =
+      item ? escapeHTML(item.q) : "";
+
+    const a1 =
+      item ? escapeHTML(item.a[0]) : "";
+
+    const a2 =
+      item ? escapeHTML(item.a[1]) : "";
+
+    const a3 =
+      item ? escapeHTML(item.a[2]) : "";
+
+    container.innerHTML += `
 
     <div class="q">
 
@@ -607,24 +669,24 @@ function buildQuestionFields(existing=null){
         id="q${i}"
         rows="2"
         placeholder="Votre question"
-      >${item ? escapeHTML(item.q) : ""}</textarea>
+      >${qText}</textarea>
 
       <input
         id="a${i}1"
         placeholder="Réponse A"
-        value="${item ? escapeAttribute(item.a[0]) : ""}"
+        value="${a1}"
       >
 
       <input
         id="a${i}2"
         placeholder="Réponse B"
-        value="${item ? escapeAttribute(item.a[1]) : ""}"
+        value="${a2}"
       >
 
       <input
         id="a${i}3"
         placeholder="Réponse C"
-        value="${item ? escapeAttribute(item.a[2]) : ""}"
+        value="${a3}"
       >
 
       <select id="ok${i}">
@@ -668,7 +730,7 @@ function collectQuestions(){
 
   let questions = [];
 
-  for(let i=1;i<=30;i++){
+  for(let i=1;i<=TOTAL;i++){
 
     const text =
       document
@@ -714,9 +776,13 @@ function collectQuestions(){
     }
 
     questions.push({
+
       q:text,
+
       a:answers,
+
       ok:Number(correct)
+
     });
 
   }
@@ -726,7 +792,7 @@ function collectQuestions(){
 
 
 /* =========================
-   SAUVEGARDE
+   CREATION NOUVEAU
 ========================= */
 
 async function saveQuestions(){
@@ -774,7 +840,10 @@ async function saveQuestions(){
       return;
     }
 
-    showSavedCode(name,code);
+    showSavedCode(
+      name,
+      code
+    );
 
   }
 
@@ -792,7 +861,7 @@ async function saveQuestions(){
 
 
 /* =========================
-   CODE
+   CODE SAUVEGARDE
 ========================= */
 
 function showSavedCode(name,code){
@@ -823,14 +892,16 @@ function showSavedCode(name,code){
     <div class="success">
 
       Gardez précieusement ce code.
-      Il vous permettra de modifier vos
-      questions plus tard, sans créer
-      un nouveau questionnaire.
+      Il permet de retrouver vos 50 questions
+      et de les modifier plus tard.
 
     </div>
 
-    <button onclick="copyCode('${code}')">
+    <button
+      onclick="copyCode('${code}')">
+
       Copier le code
+
     </button>
 
     <button
@@ -855,7 +926,7 @@ function showSavedCode(name,code){
 
 
 /* =========================
-   LECTURE
+   RECUPERATION
 ========================= */
 
 async function getQuiz(code){
@@ -928,17 +999,32 @@ async function loadQuestionnaireForEdit(
       return;
     }
 
-    if(
-      !Array.isArray(quiz.qs) ||
-      quiz.qs.length !== 30
-    ){
+    /*
+      IMPORTANT :
 
-      alert(
-        "Ce questionnaire ne contient " +
-        "pas exactement 30 questions."
-      );
+      Si l'ancien questionnaire contient
+      seulement 30 questions, on ajoute
+      20 emplacements vides.
 
-      return;
+      Les 30 existantes ne sont jamais
+      modifiées.
+    */
+
+    let questions =
+      Array.isArray(quiz.qs)
+      ?
+      quiz.qs.slice(0,30)
+      :
+      [];
+
+    while(questions.length < TOTAL){
+
+      questions.push({
+        q:"",
+        a:["","",""],
+        ok:null
+      });
+
     }
 
     shell(`
@@ -950,7 +1036,7 @@ async function loadQuestionnaireForEdit(
       </div>
 
       <h2>
-        Modifier mon questionnaire
+        Modifier mes 50 questions
       </h2>
 
       <p>
@@ -962,16 +1048,24 @@ async function loadQuestionnaireForEdit(
 
       <div class="success">
 
-        Modifiez ce que vous souhaitez.
-        Votre code
-        <b>${code}</b>
-        restera inchangé.
+        ✓ Vos 30 questions existantes
+        sont conservées.
+
+        <br><br>
+
+        Ajoutez maintenant vos questions
+        <b>31 à 50</b>.
+
+        <br><br>
+
+        Votre code restera
+        <b>${code}</b>.
 
       </div>
 
       <input
         id="name"
-        value="${escapeAttribute(quiz.name)}"
+        value="${escapeHTML(quiz.name)}"
         placeholder="Nom du joueur"
       >
 
@@ -980,7 +1074,7 @@ async function loadQuestionnaireForEdit(
       <button
         onclick="updateQuestions('${code}')">
 
-        Enregistrer les modifications
+        Enregistrer les 50 questions
 
       </button>
 
@@ -996,7 +1090,9 @@ async function loadQuestionnaireForEdit(
 
     `);
 
-    buildQuestionFields(quiz.qs);
+    buildQuestionFields(
+      questions
+    );
 
   }
 
@@ -1065,12 +1161,11 @@ async function updateQuestions(code){
       </div>
 
       <h2>
-        Modifications enregistrées
+        Les 50 questions sont enregistrées
       </h2>
 
       <p>
-        Tout est prêt,
-        et votre code reste :
+        Votre code reste :
       </p>
 
       <div class="code">
@@ -1112,7 +1207,7 @@ async function updateQuestions(code){
 
 
 /* =========================
-   COPIE
+   COPIE CODE
 ========================= */
 
 function copyCode(code){
@@ -1144,7 +1239,7 @@ function copyCode(code){
 
 
 /* =========================
-   PARTIE
+   LANCEMENT PARTIE
 ========================= */
 
 async function startGame(){
@@ -1210,13 +1305,14 @@ async function startGame(){
 
     if(
       !Array.isArray(player1.qs) ||
-      player1.qs.length !== 30 ||
+      player1.qs.length < TOTAL ||
       !Array.isArray(player2.qs) ||
-      player2.qs.length !== 30
+      player2.qs.length < TOTAL
     ){
 
       status.textContent =
-        "Un des questionnaires n'a pas 30 questions.";
+        "Les deux questionnaires doivent " +
+        "contenir 50 questions.";
 
       return;
     }
@@ -1284,7 +1380,9 @@ function showQuestion(){
 
   const progress =
     Math.round(
-      totalAnswered / 60 * 100
+      totalAnswered /
+      (TOTAL * 2) *
+      100
     );
 
   shell(`
@@ -1296,7 +1394,7 @@ function showQuestion(){
       <span>
         Question
         ${game.index+1}
-        / 30
+        / ${TOTAL}
       </span>
 
       <span>
@@ -1324,9 +1422,11 @@ function showQuestion(){
     </div>
 
     <div class="progress">
+
       <span
         style="width:${progress}%">
       </span>
+
     </div>
 
     <span class="turn">
@@ -1406,7 +1506,7 @@ function answerQuestion(answer){
 
   }
 
-  if(game.index >= 30){
+  if(game.index >= TOTAL){
 
     showResults();
 
@@ -1434,12 +1534,12 @@ function showResults(){
 
   const percent1 =
     Math.round(
-      score1 / 30 * 100
+      score1 / TOTAL * 100
     );
 
   const percent2 =
     Math.round(
-      score2 / 30 * 100
+      score2 / TOTAL * 100
     );
 
   let result;
@@ -1497,7 +1597,7 @@ function showResults(){
         )}
       </b>
 
-      · ${score1}/30
+      · ${score1}/${TOTAL}
       · ${percent1} %
 
     </p>
@@ -1510,7 +1610,7 @@ function showResults(){
         )}
       </b>
 
-      · ${score2}/30
+      · ${score2}/${TOTAL}
       · ${percent2} %
 
     </p>
@@ -1524,34 +1624,6 @@ function showResults(){
   </div>
 
   `);
-}
-
-
-/* =========================
-   SECURITE
-========================= */
-
-function escapeHTML(text){
-
-  return String(text).replace(
-    /[&<>"']/g,
-
-    char =>
-      ({
-        "&":"&amp;",
-        "<":"&lt;",
-        ">":"&gt;",
-        '"':"&quot;",
-        "'":"&#39;"
-      }[char])
-  );
-}
-
-
-function escapeAttribute(text){
-
-  return escapeHTML(text)
-    .replace(/\n/g," ");
 }
 
 
