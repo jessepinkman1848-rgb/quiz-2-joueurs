@@ -726,42 +726,50 @@ function buildQuestionFields(existing=null){
    COLLECTE
 ========================= */
 
-function collectQuestions(){
+function collectQuestions(allowIncompleteNewQuestions = false){
 
   let questions = [];
 
   for(let i=1;i<=TOTAL;i++){
 
     const text =
-      document
-        .getElementById("q"+i)
-        .value
-        .trim();
+      document.getElementById("q"+i).value.trim();
 
     const answers = [
-
-      document
-        .getElementById("a"+i+"1")
-        .value
-        .trim(),
-
-      document
-        .getElementById("a"+i+"2")
-        .value
-        .trim(),
-
-      document
-        .getElementById("a"+i+"3")
-        .value
-        .trim()
-
+      document.getElementById("a"+i+"1").value.trim(),
+      document.getElementById("a"+i+"2").value.trim(),
+      document.getElementById("a"+i+"3").value.trim()
     ];
 
     const correct =
-      document
-        .getElementById("ok"+i)
-        .value;
+      document.getElementById("ok"+i).value;
 
+    /*
+      Les questions 31 à 50 peuvent rester
+      complètement vides pendant une modification.
+    */
+    if(
+      allowIncompleteNewQuestions &&
+      i >= 31 &&
+      !text &&
+      !answers[0] &&
+      !answers[1] &&
+      !answers[2] &&
+      correct === ""
+    ){
+      questions.push({
+        q:"",
+        a:["","",""],
+        ok:null
+      });
+
+      continue;
+    }
+
+    /*
+      Une question commencée doit être
+      complètement renseignée.
+    */
     if(
       !text ||
       answers.some(x=>!x) ||
@@ -776,20 +784,14 @@ function collectQuestions(){
     }
 
     questions.push({
-
       q:text,
-
       a:answers,
-
       ok:Number(correct)
-
     });
-
   }
 
   return questions;
 }
-
 
 /* =========================
    CREATION NOUVEAU
