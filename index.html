@@ -770,18 +770,42 @@ function collectQuestions(allowIncompleteNewQuestions = false){
       Une question commencée doit être
       complètement renseignée.
     */
-    if(
-      !text ||
-      answers.some(x=>!x) ||
-      correct === ""
-    ){
+    /*
+  Une question 31 à 50 totalement vide
+  est autorisée lors d'une modification.
+*/
+if(
+  i >= 31 &&
+  !text &&
+  answers.every(x => !x) &&
+  correct === ""
+){
 
-      alert(
-        `Merci de compléter la question ${i}.`
-      );
+  questions.push({
+    q:"",
+    a:["","",""],
+    ok:null
+  });
 
-      return null;
-    }
+  continue;
+}
+
+/*
+  Toutes les autres questions doivent
+  être complètement renseignées.
+*/
+if(
+  !text ||
+  answers.some(x=>!x) ||
+  correct === ""
+){
+
+  alert(
+    `Merci de compléter la question ${i}.`
+  );
+
+  return null;
+}
 
     questions.push({
       q:text,
