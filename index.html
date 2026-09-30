@@ -745,16 +745,14 @@ function collectQuestions(allowIncompleteNewQuestions = false){
       document.getElementById("ok"+i).value;
 
     /*
-      Les questions 31 à 50 peuvent rester
-      complètement vides pendant une modification.
+      Lors d'une modification, les questions
+      31 à 50 peuvent rester complètement vides.
     */
     if(
       allowIncompleteNewQuestions &&
       i >= 31 &&
       !text &&
-      !answers[0] &&
-      !answers[1] &&
-      !answers[2] &&
+      answers.every(x => !x) &&
       correct === ""
     ){
       questions.push({
@@ -767,45 +765,21 @@ function collectQuestions(allowIncompleteNewQuestions = false){
     }
 
     /*
-      Une question commencée doit être
-      complètement renseignée.
+      Toutes les questions obligatoires doivent
+      être complètement renseignées.
     */
-    /*
-  Une question 31 à 50 totalement vide
-  est autorisée lors d'une modification.
-*/
-if(
-  i >= 31 &&
-  !text &&
-  answers.every(x => !x) &&
-  correct === ""
-){
+    if(
+      !text ||
+      answers.some(x => !x) ||
+      correct === ""
+    ){
 
-  questions.push({
-    q:"",
-    a:["","",""],
-    ok:null
-  });
+      alert(
+        `Merci de compléter la question ${i}.`
+      );
 
-  continue;
-}
-
-/*
-  Toutes les autres questions doivent
-  être complètement renseignées.
-*/
-if(
-  !text ||
-  answers.some(x=>!x) ||
-  correct === ""
-){
-
-  alert(
-    `Merci de compléter la question ${i}.`
-  );
-
-  return null;
-}
+      return null;
+    }
 
     questions.push({
       q:text,
