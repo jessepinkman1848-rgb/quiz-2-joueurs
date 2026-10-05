@@ -726,51 +726,45 @@ function buildQuestionFields(existing=null){
    COLLECTE
 ========================= */
 
-function collectQuestions(allowIncompleteNewQuestions = false){
+function collectQuestions(){
 
   let questions = [];
 
   for(let i=1;i<=TOTAL;i++){
 
     const text =
-      document.getElementById("q"+i).value.trim();
+      document
+        .getElementById("q"+i)
+        .value
+        .trim();
 
     const answers = [
-      document.getElementById("a"+i+"1").value.trim(),
-      document.getElementById("a"+i+"2").value.trim(),
-      document.getElementById("a"+i+"3").value.trim()
+
+      document
+        .getElementById("a"+i+"1")
+        .value
+        .trim(),
+
+      document
+        .getElementById("a"+i+"2")
+        .value
+        .trim(),
+
+      document
+        .getElementById("a"+i+"3")
+        .value
+        .trim()
+
     ];
 
     const correct =
-      document.getElementById("ok"+i).value;
+      document
+        .getElementById("ok"+i)
+        .value;
 
-    /*
-      Lors d'une modification, les questions
-      31 à 50 peuvent rester complètement vides.
-    */
-    if(
-      allowIncompleteNewQuestions &&
-      i >= 31 &&
-      !text &&
-      answers.every(x => !x) &&
-      correct === ""
-    ){
-      questions.push({
-        q:"",
-        a:["","",""],
-        ok:null
-      });
-
-      continue;
-    }
-
-    /*
-      Toutes les questions obligatoires doivent
-      être complètement renseignées.
-    */
     if(
       !text ||
-      answers.some(x => !x) ||
+      answers.some(x=>!x) ||
       correct === ""
     ){
 
@@ -782,14 +776,20 @@ function collectQuestions(allowIncompleteNewQuestions = false){
     }
 
     questions.push({
+
       q:text,
+
       a:answers,
+
       ok:Number(correct)
+
     });
+
   }
 
   return questions;
 }
+
 
 /* =========================
    CREATION NOUVEAU
@@ -1129,6 +1129,81 @@ async function updateQuestions(code){
     return;
 
   try{
+
+    const result =
+      await supabaseRpc(
+        "update_quiz",
+        {
+          p_code:code,
+          p_player_name:name,
+          p_questions:questions
+        }
+      );
+
+    if(result !== true){
+
+      alert(
+        "Impossible de modifier " +
+        "ce questionnaire."
+      );
+
+      return;
+    }
+
+    shell(`
+
+    <div
+      class="card"
+      style="text-align:center">
+
+      <div class="icon">
+        ✦
+      </div>
+
+      <h2>
+        Les 50 questions sont enregistrées
+      </h2>
+
+      <p>
+        Votre code reste :
+      </p>
+
+      <div class="code">
+        ${code}
+      </div>
+
+      <button
+        onclick="loadQuestionnaireForEdit('${code}')">
+
+        Modifier encore
+
+      </button>
+
+      <button
+        class="secondary"
+        onclick="home()">
+
+        Retour à l'accueil
+
+      </button>
+
+    </div>
+
+    `);
+
+  }
+
+  catch(error){
+
+    console.error(error);
+
+    alert(
+      "Impossible d'enregistrer " +
+      "les modifications.\n\n" +
+      error.message
+    );
+  }
+}
 
 
 /* =========================
