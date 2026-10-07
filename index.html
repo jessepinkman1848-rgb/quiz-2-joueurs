@@ -287,6 +287,116 @@ input:focus,textarea:focus,select:focus{
   margin:14px 0
 }
 
+.results-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+  margin:24px 0
+}
+
+.result-card{
+  position:relative;
+  border:1px solid var(--line);
+  background:#fffdf9;
+  border-radius:16px;
+  padding:20px;
+  text-align:center;
+  overflow:hidden
+}
+
+.result-card.winner{
+  border-color:rgba(113,136,120,.55);
+  box-shadow:0 8px 24px rgba(77,101,85,.10)
+}
+
+.result-card.winner:before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:5px;
+  background:var(--sage)
+}
+
+.result-name{
+  font-family:Georgia,serif;
+  font-size:23px;
+  margin-bottom:8px
+}
+
+.result-big{
+  font-family:Georgia,serif;
+  font-size:38px;
+  color:var(--sage-dark);
+  margin:8px 0 2px
+}
+
+.result-percent{
+  color:var(--muted);
+  font-size:14px;
+  margin-bottom:16px
+}
+
+.result-stats{
+  display:flex;
+  justify-content:center;
+  gap:18px;
+  color:var(--muted);
+  font-size:13px;
+  margin-bottom:17px
+}
+
+.result-stats b{
+  color:var(--ink)
+}
+
+.bar-track{
+  height:10px;
+  background:#e8e3d8;
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:8px
+}
+
+.bar-fill{
+  height:100%;
+  background:var(--sage);
+  border-radius:10px
+}
+
+.result-card.second .bar-fill{
+  background:var(--terracotta)
+}
+
+.winner-badge{
+  display:inline-block;
+  padding:6px 11px;
+  border-radius:999px;
+  background:#edf2ed;
+  color:var(--sage-dark);
+  font-size:12px;
+  font-weight:700;
+  margin-bottom:8px
+}
+
+.result-verdict{
+  margin:22px 0 10px;
+  padding:18px;
+  border-radius:15px;
+  background:linear-gradient(135deg,#edf2ed,#f8f2e9);
+  border:1px solid var(--line)
+}
+
+.result-verdict h2{
+  margin:0 0 6px
+}
+
+.result-verdict p{
+  margin:0;
+  color:var(--muted)
+}
+  
 .footer{
   text-align:center;
   color:#8a8f89;
@@ -1532,6 +1642,12 @@ function showResults(){
   const score2 =
     game.score[1];
 
+  const errors1 =
+    TOTAL - score1;
+
+  const errors2 =
+    TOTAL - score2;
+
   const percent1 =
     Math.round(
       score1 / TOTAL * 100
@@ -1542,36 +1658,62 @@ function showResults(){
       score2 / TOTAL * 100
     );
 
-  let result;
+  const tied =
+    score1 === score2;
 
-  if(score1 > score2){
+  const winner =
+    score1 > score2
+      ? 0
+      : score2 > score1
+        ? 1
+        : null;
 
-    result = `
-      <h2>
-        ${escapeHTML(
-          game.players[0].name
-        )}
-        remporte la partie !
-      </h2>
-    `;
+  const gap =
+    Math.abs(score1 - score2);
 
-  }else if(score2 > score1){
+  let verdict;
 
-    result = `
-      <h2>
-        ${escapeHTML(
-          game.players[1].name
-        )}
-        remporte la partie !
-      </h2>
+  if(tied){
+
+    verdict = `
+      <div class="result-verdict">
+
+        <h2>
+          🤝 Égalité parfaite !
+        </h2>
+
+        <p>
+          ${score1} bonnes réponses chacun.
+        </p>
+
+      </div>
     `;
 
   }else{
 
-    result = `
-      <h2>
-        Égalité !
-      </h2>
+    verdict = `
+      <div class="result-verdict">
+
+        <div class="winner-badge">
+          ✦ Victoire
+        </div>
+
+        <h2>
+          ${escapeHTML(
+            game.players[winner].name
+          )}
+          remporte la partie !
+        </h2>
+
+        <p>
+          Avec
+          <b>
+            ${gap} bonne${gap>1?"s":""}
+            réponse${gap>1?"s":""} d'avance
+          </b>.
+        </p>
+
+      </div>
     `;
   }
 
@@ -1585,37 +1727,119 @@ function showResults(){
       ✦ ❧ ✦
     </div>
 
+    <div class="eyebrow">
+      bilan de la partie
+    </div>
+
     <h2>
       La nuitée touche à sa fin
     </h2>
 
-    <p class="result-score">
-
-      <b>
-        ${escapeHTML(
-          game.players[0].name
-        )}
-      </b>
-
-      · ${score1}/${TOTAL}
-      · ${percent1} %
-
+    <p>
+      100 questions · 50 chacun · 100 réponses données
     </p>
 
-    <p class="result-score">
 
-      <b>
-        ${escapeHTML(
-          game.players[1].name
-        )}
-      </b>
+    <div class="results-grid">
 
-      · ${score2}/${TOTAL}
-      · ${percent2} %
 
-    </p>
+      <div class="result-card ${winner === 0 ? "winner" : ""}">
 
-    ${result}
+        ${
+          winner === 0
+            ? '<div class="winner-badge">🏆 Gagnant</div>'
+            : ''
+        }
+
+        <div class="result-name">
+          ${escapeHTML(
+            game.players[0].name
+          )}
+        </div>
+
+        <div class="result-big">
+          ${score1} / ${TOTAL}
+        </div>
+
+        <div class="result-percent">
+          ${percent1} % de réussite
+        </div>
+
+        <div class="result-stats">
+
+          <span>
+            ✓ <b>${score1}</b> bonnes
+          </span>
+
+          <span>
+            ✕ <b>${errors1}</b> erreurs
+          </span>
+
+        </div>
+
+        <div class="bar-track">
+
+          <div
+            class="bar-fill"
+            style="width:${percent1}%">
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="result-card second ${winner === 1 ? "winner" : ""}">
+
+        ${
+          winner === 1
+            ? '<div class="winner-badge">🏆 Gagnant</div>'
+            : ''
+        }
+
+        <div class="result-name">
+          ${escapeHTML(
+            game.players[1].name
+          )}
+        </div>
+
+        <div class="result-big">
+          ${score2} / ${TOTAL}
+        </div>
+
+        <div class="result-percent">
+          ${percent2} % de réussite
+        </div>
+
+        <div class="result-stats">
+
+          <span>
+            ✓ <b>${score2}</b> bonnes
+          </span>
+
+          <span>
+            ✕ <b>${errors2}</b> erreurs
+          </span>
+
+        </div>
+
+        <div class="bar-track">
+
+          <div
+            class="bar-fill"
+            style="width:${percent2}%">
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    ${verdict}
+
 
     <button onclick="home()">
       Une autre partie
