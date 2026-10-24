@@ -1123,7 +1123,7 @@ async function loadQuestionnaireForEdit(
     let questions =
       Array.isArray(quiz.qs)
       ?
-      quiz.qs.slice(0,30)
+      quiz.qs.slice(0,TOTAL)
       :
       [];
 
